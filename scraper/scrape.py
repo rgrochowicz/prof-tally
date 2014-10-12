@@ -16,6 +16,7 @@ class Course(object):
 		self.subject = str(children[1].string)
 		self.course_num = str(children[2].string)
 		self.section = str(children[3].string)
+		# 4 is "part of term", 5 is "session" (time of day)
 		self.title = str(list(children[6].children)[0].string)
 		self.professors = list(map(str, children[7].stripped_strings))
 		self.raw_times = list(map(str, children[8].stripped_strings))
@@ -40,7 +41,7 @@ class CourseTime(object):
 		match = CourseTime.matcher.match(raw_time)
 		self.raw_time = raw_time
 		self.invalid = True
-		
+
 		if match:
 			self.days = match.group('days')
 			self.start_time = match.group('start_time')
@@ -102,20 +103,91 @@ def main():
 	for course in courses:
 
 		#put the course into the db
-		cur.execute("INSERT INTO courses (crn, subject, course_num, section, title, professors, campus, hours, max, max_reserved, left_reserved, enrolled, available) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s) RETURNING id",
-				(course.crn, course.subject, course.course_num, course.section, course.title, course.professors, course.campus, course.hours, course.max, course.max_reserved, course.left_reserved, course.enrolled, course.available))
+		cur.execute(
+			"INSERT INTO courses (				\
+				crn,							\
+				subject,						\
+				course_num,						\
+				section,						\
+				title,							\
+				professors,						\
+				campus,							\
+				hours,							\
+				max,							\
+				max_reserved,					\
+				left_reserved,					\
+				enrolled,						\
+				available						\
+			)									\
+			VALUES (%s, %s, %s, %s, %s, %s,		\
+					%s, %s, %s, %s, %s, %s, %s) \
+			RETURNING id",
+			(	course.crn,
+				course.subject,
+				course.course_num,
+				course.section,
+				course.title,
+				course.professors,
+				course.campus,
+				course.hours,
+				course.max,
+				course.max_reserved,
+				course.left_reserved,
+				course.enrolled,
+				course.available	)
+		)
 		course_id = cur.fetchone()[0]
 
 		for time in course.times:
 			if time.invalid:
 				#insert a row to fix later
-				cur.execute("INSERT INTO course_times (course_id, weekday, start_time, length, building, room, type, invalid, raw_time) VALUES (%(course_id)s, null, null, null, null, null, null, %(invalid)s, %(raw_time)s)",
-					{"course_id": course_id, "invalid": time.invalid, "raw_time": time.raw_time})
+				cur.execute(
+					"INSERT INTO course_times (						\
+						course_id,									\
+						weekday,									\
+						start_time,									\
+						length,										\
+						building,									\
+						room,										\
+						type,										\
+						invalid,									\
+						raw_time									\
+					)												\
+					VALUES (%(course_id)s, null, null, null, null,	\
+							null, null, %(invalid)s, %(raw_time)s)",
+					{	"course_id": course_id,
+						"invalid": time.invalid,
+						"raw_time": time.raw_time	}
+				)
 			else:
 				#insert a row per day
 				for day in time.days:
-					cur.execute("INSERT INTO course_times (course_id, weekday, start_time, length, building, room, type, invalid, raw_time) VALUES (%(course_id)s, %(day)s, %(start_time)s, %(end_time)s::time - %(start_time)s::time, %(building)s, %(room)s, %(type)s, %(invalid)s, %(raw_time)s)",
-						{"course_id": course_id, "day": day, "start_time": time.start_time, "end_time": time.end_time, "building": time.building, "room": time.room, "type": time.type, "invalid": time.invalid, "raw_time": time.raw_time})
+					cur.execute(
+						"INSERT INTO course_times (		\
+							course_id,					\
+							weekday,					\
+							start_time,					\
+							length,						\
+							building,					\
+							room,						\
+							type,						\
+							invalid,					\
+							raw_time					\
+						)								\
+						VALUES (%(course_id)s, %(day)s, %(start_time)s,			\
+								%(end_time)s::time - %(start_time)s::time,		\
+								%(building)s, %(room)s,  %(type)s,				\
+								%(invalid)s, %(raw_time)s)",
+						{	"course_id": course_id,
+							"day": day,
+							"start_time": time.start_time,
+							"end_time": time.end_time,
+							"building": time.building,
+							"room": time.room,
+							"type": time.type,
+							"invalid": time.invalid,
+							"raw_time": time.raw_time	}
+					)
 
 	#commit and close connection
 	conn.commit()
@@ -124,3 +196,5 @@ def main():
 
 if __name__ == '__main__':
 	main()
+
+# vim:tabstop=4:noexpandtab
