@@ -6,9 +6,11 @@ Provides endpoints for schedule creation and stats.
 Endpoints:
 -------------
 ####/schedule
+    Returns a list of possible schedules based off of course numbers.
+
 Post data:
 ```
-classNames[]=Class1&classNames[]=Class2
+courseNumbers[]=12315&courseNumbers[]=21342
 ```
 Response:
 ```json
@@ -23,4 +25,15 @@ Response:
 		}]
     ]
 }]
+```
+
+####/courses
+    Returns the available courses with names and numbers.
+
+Response:
+```json
+[{
+	"course_num": 12345,
+	"name": "Class Name"
+},...]
 ```
