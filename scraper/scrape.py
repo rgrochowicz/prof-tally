@@ -4,6 +4,7 @@ from bs4 import NavigableString
 import re
 import psycopg2
 import json
+import os.path
 
 class Course(object):
 
@@ -54,10 +55,6 @@ class CourseTime(object):
 
 def main():
 
-
-	#set to true to download fresh from rowan
-	download_fresh = False
-
 	#get everything from the section tally
 	datas = {
 		"term": "201520",
@@ -74,14 +71,17 @@ def main():
 		"Search": "Search"
 	}
 
+
+	# download and cache in page.html
 	text = ""
-	if download_fresh:
-		r = requests.post("http://banner.rowan.edu/reports/reports.pl?task=Section_Tally", data=datas)
-		text = r.text
-	else:
+	if os.path.isfile('page.html'):
 		with open('page.html') as page:
 			text = page.read()
-
+	else:
+		r = requests.post("http://banner.rowan.edu/reports/reports.pl?task=Section_Tally", data=datas)
+		text = r.text
+		with open('page.html', 'w') as page:
+			page.write(text)
 
 	courses = []
 
