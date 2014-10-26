@@ -6,17 +6,17 @@ Provides endpoints for schedule creation and stats.
 Endpoints:
 -------------
 ####/schedule
-    Returns a list of possible schedules based off of course numbers.
+    Returns a list of possible schedules based off of course titles.
 
 Post data:
 ```
-courseNumbers[]=12315&courseNumbers[]=21342
+courseTitles[]=Course+1&courseTitles[]=Course+2
 ```
 Response:
 ```json
 [{
 	"courses": [
-		"name": "A Course Name",
+		"title": "A Course Title",
 		"crn": 1,
 		"times": [{
 			"day": "M",
@@ -28,12 +28,13 @@ Response:
 ```
 
 ####/courses
-    Returns the available courses with names and numbers.
+    Returns the available courses with subjects, titles, and numbers.
 
 Response:
 ```json
 [{
-	"course_num": 12345,
-	"name": "Class Name"
+	"subject": "CS",
+	"title": "Class Title",
+	"course_num": "CS01000"
 },...]
 ```
