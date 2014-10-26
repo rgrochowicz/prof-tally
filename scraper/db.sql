@@ -4,7 +4,7 @@
 
 -- Dumped from database version 9.3.5
 -- Dumped by pg_dump version 9.3.1
--- Started on 2014-10-26 14:53:13
+-- Started on 2014-10-26 19:50:26
 
 SET statement_timeout = 0;
 SET lock_timeout = 0;
@@ -102,7 +102,7 @@ CREATE TABLE course_times (
     id integer NOT NULL,
     course_crn integer,
     weekday weekday,
-    start_time time with time zone,
+    start_time time without time zone,
     length interval,
     building text,
     room text,
@@ -226,7 +226,7 @@ GRANT ALL ON SCHEMA public TO postgres;
 GRANT ALL ON SCHEMA public TO PUBLIC;
 
 
--- Completed on 2014-10-26 14:53:14
+-- Completed on 2014-10-26 19:50:27
 
 --
 -- PostgreSQL database dump complete
