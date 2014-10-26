@@ -15,7 +15,7 @@ courseTitles[]=Course+1&courseTitles[]=Course+2
 Response:
 ```json
 [{
-	"courses": [
+	"courses": [{
 		"title": "A Course Title",
 		"crn": 1,
 		"times": [{
@@ -23,7 +23,7 @@ Response:
 			"start": "12:00",
 			"length": "1:15"
 		}]
-    ]
+    },...]
 }]
 ```
 
