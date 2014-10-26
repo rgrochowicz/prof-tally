@@ -120,8 +120,7 @@ def main():
 				available						\
 			)									\
 			VALUES (%s, %s, %s, %s, %s, %s,		\
-					%s, %s, %s, %s, %s, %s, %s) \
-			RETURNING id",
+					%s, %s, %s, %s, %s, %s, %s)",
 			(	course.crn,
 				course.subject,
 				course.course_num,
@@ -136,14 +135,13 @@ def main():
 				course.enrolled,
 				course.available	)
 		)
-		course_id = cur.fetchone()[0]
 
 		for time in course.times:
 			if time.invalid:
 				#insert a row to fix later
 				cur.execute(
 					"INSERT INTO course_times (						\
-						course_id,									\
+						course_crn,									\
 						weekday,									\
 						start_time,									\
 						length,										\
@@ -153,9 +151,9 @@ def main():
 						invalid,									\
 						raw_time									\
 					)												\
-					VALUES (%(course_id)s, null, null, null, null,	\
+					VALUES (%(course_crn)s, null, null, null, null,	\
 							null, null, %(invalid)s, %(raw_time)s)",
-					{	"course_id": course_id,
+					{	"course_crn": course.crn,
 						"invalid": time.invalid,
 						"raw_time": time.raw_time	}
 				)
@@ -164,7 +162,7 @@ def main():
 				for day in time.days:
 					cur.execute(
 						"INSERT INTO course_times (		\
-							course_id,					\
+							course_crn,					\
 							weekday,					\
 							start_time,					\
 							length,						\
@@ -174,11 +172,11 @@ def main():
 							invalid,					\
 							raw_time					\
 						)								\
-						VALUES (%(course_id)s, %(day)s, %(start_time)s,			\
+						VALUES (%(course_crn)s, %(day)s, %(start_time)s,			\
 								%(end_time)s::time - %(start_time)s::time,		\
 								%(building)s, %(room)s,  %(type)s,				\
 								%(invalid)s, %(raw_time)s)",
-						{	"course_id": course_id,
+						{	"course_crn": course.crn,
 							"day": day,
 							"start_time": time.start_time,
 							"end_time": time.end_time,
