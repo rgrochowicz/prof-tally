@@ -25,3 +25,7 @@ server {
 	}
 }
 ```
+
+Docker
+------
+A docker container is provided.  Make sure to set `API_HOST` and `API_PORT` to their actual values.  Nginx will always listen on port 80.
