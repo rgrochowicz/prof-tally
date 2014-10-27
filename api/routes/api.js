@@ -3,13 +3,17 @@ var Promise = require('bluebird');
 var pg = require('pg');
 var _ = require('lodash');
 
+var connectionObject = {
+	user: process.env.POSTGRES_USER,
+	database: process.env.POSTGRES_DATABASE,
+	password: process.env.POSTGRES_PASSWORD,
+	host: process.env.POSTGRES_HOST
+};
+
 var router = express.Router();
-var conString = "postgres://tally:tally@localhost/tally";
-
-
 /* Get list of classes */
 router.get('/classes', function(req, res) {
-	pg.connect(conString, function(err, client, done) {
+	pg.connect(connectionObject, function(err, client, done) {
 		if(err) {
 			res.json({error: err});
 			return;
@@ -30,7 +34,7 @@ router.get('/classes', function(req, res) {
 
 /* Get schedules based on the titles */
 router.get('/schedule', function(req, res) {
-	pg.connect(conString, function(err, client, done) {
+	pg.connect(connectionObject, function(err, client, done) {
 		if(err) {
 			res.json({error: err});
 			return;

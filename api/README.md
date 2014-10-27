@@ -45,4 +45,8 @@ Set up:
 1. Install node ~0.11
 2. Run `npm install` to install dependencies
 3. Make sure postgres is running and accessible.
-4. Run `./bin/www` to start the api on port 3000
+4. Run `./bin/www` to start the API server on port 3000
+
+Docker:
+-------
+A docker container is provided.  Make sure to set the `POSTGRES_HOST`, `POSTGRES_USER`, `POSTGRES_PASSWORD`, and `POSTGRES_DATABASE` to their actual values. The API server will listen on port 3000 by default unless the `PORT` environment variable is modified.
