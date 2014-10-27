@@ -1,7 +1,7 @@
 Scraper
 =======
 
-This is the scraper portion. Scrape the section tally page and dump it into a database.
+This is the scraper portion. Scrapes the section tally page and dumps it into a database.
 
 Prereqs:
 --------
