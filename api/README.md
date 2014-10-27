@@ -38,3 +38,11 @@ Response:
 	"course_num": "CS01000"
 },...]
 ```
+
+
+Set up:
+-------
+1. Install node ~0.11
+2. Run `npm install` to install dependencies
+3. Make sure postgres is running and accessible.
+4. Run `./bin/www` to start the api on port 3000
