@@ -11,7 +11,7 @@ server {
 	}
 
 	location /api {
-		proxy_pass http://$API_HOST:$API_PORT/;
+		proxy_pass http://$API_HOST:$API_PORT/api/;
 	}
 
 }
