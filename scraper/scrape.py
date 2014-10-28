@@ -98,7 +98,12 @@ def main():
 		if 'style' in tr.attrs and tr.attrs['style'] == 'background-color:inherit':
 			courses.append(Course(tr))
 
-	conn = psycopg2.connect("dbname=tally user=tally password=tally host=127.0.0.1")
+	conn = psycopg2.connect(database=os.environ['POSTGRES_DATABASE'],
+		user=os.environ['POSTGRES_USER'],
+		password=os.environ['POSTGRES_PASSWORD'],
+		host=os.environ['POSTGRES_HOST'],
+		port=os.environ['POSTGRES_PORT'])
+	
 	cur = conn.cursor()
 	for course in courses:
 
