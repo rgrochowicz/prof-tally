@@ -7,7 +7,8 @@ var connectionObject = {
 	user: process.env.POSTGRES_USER,
 	database: process.env.POSTGRES_DATABASE,
 	password: process.env.POSTGRES_PASSWORD,
-	host: process.env.POSTGRES_HOST
+	host: process.env.POSTGRES_HOST,
+	post: process.env.POSTGRES_PORT
 };
 
 var router = express.Router();
