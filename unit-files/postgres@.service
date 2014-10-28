@@ -1,0 +1,24 @@
+[Unit]
+Description=Postgres Service
+
+Requires=etcd.service
+Requires=docker.service
+Requires=postgres-discovery@%i.service
+
+After=etcd.service
+After=docker.service
+Before=postgres-discovery@%i.service
+
+[Service]
+TimeoutStartSec=0
+KillMode=none
+Environment="DOCKER_IMAGE=rgrochowicz/prof-tally:postgres"
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill postgres-%i
+ExecStartPre=-/usr/bin/docker rm postgres-%i
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStart=/bin/sh -c '/usr/bin/docker run --rm --name postgres-%i -p 5432:5432 ${DOCKER_IMAGE}'
+ExecStop=-/usr/bin/docker stop postgres-%i
+
+[X-Fleet]
+X-Conflicts=postgres@*.service

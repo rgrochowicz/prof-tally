@@ -1,0 +1,17 @@
+[Unit]
+Description=Postgres Service Discovery
+
+Requires=etcd.service
+
+After=etcd.service
+After=postgres@%i.service
+BindsTo=postgres@%i.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStart=/bin/bash -c 'while true; do etcdctl set /services/postgres/host "${COREOS_PRIVATE_IPV4}" --ttl 45; etcdctl set /services/postgres/port 5432 --ttl 45; sleep 30; done'
+ExecStop=/usr/bin/etcdctl rm /services/postgres/host
+ExecStop=/usr/bin/etcdctl rm /services/postgres/port
+
+[X-Fleet]
+X-ConditionMachineOf=postgres@%i.service

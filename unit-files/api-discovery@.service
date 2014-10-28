@@ -1,0 +1,17 @@
+[Unit]
+Description=API Service Discovery
+
+Requires=etcd.service
+
+After=etcd.service
+After=api@%i.service
+BindsTo=api@%i.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStart=/bin/bash -c 'while true; do etcdctl set /services/api/host "${COREOS_PRIVATE_IPV4}" --ttl 45; etcdctl set /services/api/port 3000 --ttl 45; sleep 30; done'
+ExecStop=/usr/bin/etcdctl rm /services/api/host
+ExecStop=/usr/bin/etcdctl rm /services/api/port
+
+[X-Fleet]
+X-ConditionMachineOf=api@%i.service

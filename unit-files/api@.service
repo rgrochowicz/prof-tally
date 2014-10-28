@@ -1,0 +1,25 @@
+[Unit]
+Description=API Service
+
+Requires=etcd.service
+Requires=docker.service
+Requires=api-discovery@%i.service
+
+After=etcd.service
+After=docker.service
+Before=api-discovery@%i.service
+
+[Service]
+TimeoutStartSec=0
+KillMode=none
+Environment="DOCKER_IMAGE=rgrochowicz/prof-tally:api"
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill api-%i
+ExecStartPre=-/usr/bin/docker rm api-%i
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStartPre=/bin/sh -c '/usr/bin/etcdctl get /services/postgres/port || /usr/bin/etcdctl watch /services/postgres/port'
+ExecStart=/bin/sh -c '/usr/bin/docker run --rm --name api-%i -p 3000:3000 -e POSTGRES_USER=tally -e POSTGRES_PASSWORD=tally -e POSTGRES_DATABASE=tally -e POSTGRES_HOST=$(etcdctl get /services/postgres/host) -e POSTGRES_PORT=$(etcdctl get /services/postgres/port) ${DOCKER_IMAGE}'
+ExecStop=-/usr/bin/docker stop api-%i
+
+[X-Fleet]
+X-Conflicts=api@*.service

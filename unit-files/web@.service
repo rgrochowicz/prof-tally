@@ -1,0 +1,24 @@
+[Unit]
+Description=Web Service
+
+Requires=etcd.service
+Requires=docker.service
+Requires=web-discovery@%i.service
+
+After=etcd.service
+After=docker.service
+Before=web-discovery@%i.service
+
+[Service]
+TimeoutStartSec=0
+KillMode=none
+Environment="DOCKER_IMAGE=rgrochowicz/prof-tally:web"
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill web-%i
+ExecStartPre=-/usr/bin/docker rm web-%i
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStart=/bin/sh -c '/usr/bin/docker run --rm --name web-%i -e API_HOST=$(/usr/bin/etcdctl get /services/api/host) -e API_PORT=$(/usr/bin/etcdctl get /services/api/port) -p 80:80 ${DOCKER_IMAGE}'
+ExecStop=-/usr/bin/docker stop web-%i
+
+[X-Fleet]
+X-Conflicts=web@*.service

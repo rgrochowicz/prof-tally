@@ -1,0 +1,17 @@
+[Unit]
+Description=Web Service Discovery
+
+Requires=etcd.service
+
+After=etcd.service
+After=web@%i.service
+BindsTo=web@%i.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStart=/bin/bash -c 'while true; do etcdctl set /services/web/host ${COREOS_PRIVATE_IP} --ttl 45; etcdctl set /services/web/port 80 --ttl 45; sleep 30; done'
+ExecStop=/usr/bin/etcdctl rm /services/web/host
+ExecStop=/usr/bin/etcdctl rm /services/web/port
+
+[X-Fleet]
+X-ConditionMachineOf=web@%i.service

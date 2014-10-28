@@ -1,0 +1,23 @@
+[Unit]
+Description=Scraper Service
+
+Requires=etcd.service
+Requires=docker.service
+
+After=etcd.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+KillMode=none
+Environment="DOCKER_IMAGE=rgrochowicz/prof-tally:scraper"
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill scraper-%i
+ExecStartPre=-/usr/bin/docker rm scraper-%i
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStartPre=/bin/sh -c '/usr/bin/etcdctl get /services/postgres/port || /usr/bin/etcdctl watch /services/postgres/port'
+ExecStart=/bin/sh -c '/usr/bin/docker run --rm --name scraper-%i -e POSTGRES_USER=tally -e POSTGRES_PASSWORD=tally -e POSTGRES_DATABASE=tally -e POSTGRES_HOST=$(etcdctl get /services/postgres/host) -e POSTGRES_PORT=$(etcdctl get /services/postgres/port) ${DOCKER_IMAGE}'
+ExecStop=-/usr/bin/docker stop scraper-%i
+
+[X-Fleet]
+X-Conflicts=scraper@*.service
