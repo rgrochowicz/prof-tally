@@ -35,4 +35,4 @@ To use this with CoreOS, fleet unit files are provided.  Launch the services wit
 1. `fleetctl start postgres@1.service postgres-discovery@1.service`
 2. `fleetctl start api@1.service api-discovery@1.service`
 3. `fleetctl start web@1.service web-discovery@1.service`
-4. `fleetctl start scraper@1.service scraper-discovery@1.service`
+4. `fleetctl start scraper@1.service`
