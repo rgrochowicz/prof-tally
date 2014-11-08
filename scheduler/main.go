@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"github.com/garyburd/redigo/redis"
+	"github.com/nutrun/lentil"
 	"log"
 	"time"
 )
@@ -12,18 +13,17 @@ var (
 	c redis.Conn
 )
 
-type CrnSchedule struct {
-	Crns []string
-}
+type CrnSchedule []string
 
 func getNext(crns []string, titles []string) []CrnSchedule {
 
 	//when there are not titles left, return the crns collected
 	if len(titles) == 0 {
+		crnsCopy := make(CrnSchedule, len(crns))
+		copy(crnsCopy, crns)
+
 		return []CrnSchedule{
-			CrnSchedule{
-				Crns: crns,
-			},
+			crnsCopy,
 		}
 	}
 
@@ -42,6 +42,7 @@ func getNext(crns []string, titles []string) []CrnSchedule {
 
 	finalResult := []CrnSchedule{}
 	for _, entry := range entries {
+
 		results := getNext(append(crns, entry), titles[1:])
 		for _, result := range results {
 			finalResult = append(finalResult, result)
@@ -50,6 +51,22 @@ func getNext(crns []string, titles []string) []CrnSchedule {
 
 	return finalResult
 
+}
+
+func MakeSchedules(titles []string) ([]byte, error) {
+	log.Println(titles)
+	startTime := time.Now()
+
+	crnSchedules := getNext([]string{}, titles)
+
+	jsonBytes, err := json.Marshal(crnSchedules)
+	if err != nil {
+		return nil, err
+	}
+
+	log.Println(time.Since(startTime))
+
+	return jsonBytes, nil
 }
 
 func main() {
@@ -63,20 +80,43 @@ func main() {
 	}
 	defer c.Close()
 
-	titles := []string{"FOUNDATIONS COMP SCI", "OBJ-ORIENT PRGRM/DATA ABSTR", "LINEAR ALGEBRA", "COLLEGE COMPOSITION II", "PUBLIC SPEAKING", "DISCRETE STRUCTURES"}
-
-	startTime := time.Now()
-
-	crnSchedules := getNext([]string{}, titles)
-
-	jsonBytes, err := json.Marshal(crnSchedules)
+	// Limit number of concurrent jobs execution. Use worker.Unlimited (0) if you want no limitation.
+	conn, err := lentil.Dial("0.0.0.0:11300")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	log.Println(time.Since(startTime))
+	conn.Watch("schedules")
 
-	log.Println(len(crnSchedules))
-	log.Println(len(jsonBytes))
+	log.Println("Listening")
+	for {
+		job, err := conn.Reserve()
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		titles := []string{}
+		err = json.Unmarshal(job.Body, &titles)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		result, err := MakeSchedules(titles)
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		err = conn.Delete(job.Id)
+
+		if err != nil {
+			log.Fatalln(err)
+		}
+
+		conn.Use(fmt.Sprintf("schedule_result_%d", job.Id))
+		conn.Put(0, 0, 60, result)
+
+	}
+
+	log.Println("Exiting")
 
 }
