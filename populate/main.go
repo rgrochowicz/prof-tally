@@ -7,6 +7,7 @@ import (
     "log"
     "github.com/garyburd/redigo/redis"
     "fmt"
+    "os"
 )
 
 var (
@@ -109,13 +110,13 @@ func main() {
 
 	var err error
 
-	db, err = sqlx.Connect("postgres", "user=tally dbname=tally password=tally sslmode=disable")
+	db, err = sqlx.Connect("postgres", os.ExpandEnv("user=${POSTGRES_USER} dbname=${POSTGRES_DATABASE} password=${POSTGRES_PASSWORD} host=${POSTGRES_HOST} port=${POSTGRES_PORT} sslmode=disable"))
     if err != nil {
         log.Fatalln(err)
     }
     defer db.Close()
 
-    c, err = redis.Dial("tcp", ":6380")
+    c, err = redis.Dial("tcp", os.ExpandEnv("${REDIS_HOST}:${REDIS_PORT}"))
     if err != nil {
     	log.Fatalln(err)
     }
