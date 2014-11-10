@@ -3,6 +3,14 @@ Scraper
 
 This is the scraper portion. Scrapes the section tally page and dumps it into a database.
 
+Required Environment Vars:
+--------------------------
+- POSTGRES_DATABASE
+- POSTGRES_USER
+- POSTGRES_PASSWORD
+- POSTGRES_HOST
+- POSTGRES_PORT
+
 Prereqs:
 --------
 1. Install postgres with a user named `tally`

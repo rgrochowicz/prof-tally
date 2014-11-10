@@ -3,7 +3,10 @@ Web
 
 Provides the web ui for the app.  This is the **static** portion.  It's pretty much useless without the API running.
 
-Attempts to follow [this style guide](https://github.com/gocardless/angularjs-style-guide).
+Required Environment Vars:
+-------------------------
+- API_HOST
+- API_PORT
 
 nginx configuration:
 --------------------
@@ -21,11 +24,7 @@ server {
 
 	#send everything that's going to /api to the node process
 	location /api {
-		proxy_pass http://127.0.0.1:3000;
+		proxy_pass http://127.0.0.1:8080;
 	}
 }
 ```
-
-Docker
-------
-A docker container is provided.  Make sure to set `API_HOST` and `API_PORT` to their actual values.  Nginx will always listen on port 80.

@@ -7,6 +7,7 @@ import (
 	"github.com/nutrun/lentil"
 	"log"
 	"time"
+	"os"
 )
 
 type CrnSchedule []string
@@ -18,7 +19,7 @@ type Scheduler struct {
 func NewScheduler() (*Scheduler, error) {
 
 	//connect to redis
-	c, err := redis.Dial("tcp", ":6379")
+	c, err := redis.Dial("tcp", os.ExpandEnv("${REDIS_HOST}:${REDIS_PORT}"))
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +34,7 @@ func (s *Scheduler) Make(needles []string) []CrnSchedule {
 }
 
 func (s *Scheduler) getNext(crns, needles []string) []CrnSchedule {
-	
+
 	//when there are no needles left, return the crns collected
 	if len(needles) == 0 {
 		crnsCopy := make(CrnSchedule, len(crns))
@@ -103,7 +104,7 @@ func MakeSchedules(needles []string) ([]byte, error) {
 func main() {
 
 	//connect to beanstalkd
-	conn, err := lentil.Dial("0.0.0.0:11300")
+	conn, err := lentil.Dial(os.ExpandEnv("${BEANSTALKD_HOST}:${BEANSTALKD_PORT}"))
 	if err != nil {
 		log.Fatalln(err)
 	}

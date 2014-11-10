@@ -3,6 +3,18 @@ API
 
 Provides endpoints for schedule creation and stats.
 
+Required Environment Vars:
+--------------------------
+- BEANSTALKD_HOST
+- BEANSTALKD_PORT
+- POSTGRES_DATABASE
+- POSTGRES_USER
+- POSTGRES_PASSWORD
+- POSTGRES_HOST
+- POSTGRES_PORT
+- REDIS_HOST
+- REDIS_PORT
+
 Endpoints:
 -------------
 ####/schedule

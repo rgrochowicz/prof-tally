@@ -1,0 +1,24 @@
+[Unit]
+Description=Beanstalkd Service
+
+Requires=etcd.service
+Requires=docker.service
+Requires=beanstalkd-discovery@%i.service
+
+After=etcd.service
+After=docker.service
+Before=beanstalkd-discovery@%i.service
+
+[Service]
+TimeoutStartSec=0
+KillMode=none
+Environment="DOCKER_IMAGE=rgrochowicz/prof-tally:beanstalkd"
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill beanstalkd-%i
+ExecStartPre=-/usr/bin/docker rm beanstalkd-%i
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStart=/bin/sh -c '/usr/bin/docker run --rm --name beanstalkd-%i -p 11300:11300 ${DOCKER_IMAGE}'
+ExecStop=-/usr/bin/docker stop beanstalkd-%i
+
+[X-Fleet]
+X-Conflicts=beanstalkd@*.service

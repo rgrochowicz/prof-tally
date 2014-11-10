@@ -1,0 +1,17 @@
+[Unit]
+Description=Beanstalkd Service Discovery
+
+Requires=etcd.service
+
+After=etcd.service
+After=beanstalkd@%i.service
+BindsTo=beanstalkd@%i.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStart=/bin/bash -c 'while true; do etcdctl set /services/beanstalkd/host ${COREOS_PRIVATE_IP} --ttl 45; etcdctl set /services/beanstalkd/port 11300 --ttl 45; sleep 30; done'
+ExecStop=/usr/bin/etcdctl rm /services/beanstalkd/host
+ExecStop=/usr/bin/etcdctl rm /services/beanstalkd/port
+
+[X-Fleet]
+X-ConditionMachineOf=beanstalkd@%i.service

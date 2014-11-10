@@ -21,7 +21,7 @@
     <link rel="stylesheet" href="assets/stylesheets/main.css">
   </head>
 
-  <body ng-controller="MainCtrl">
+  <body>
 
     <div class="navbar navbar-inverse" role="navigation">
       <div class="container">
@@ -37,33 +37,8 @@
       </div>
     </div>
 
-    <div class="container">
+    <div class="container" ui-view>
 
-      <div class="row">
-        <div class="col-md-11">
-
-          <select chosen multiple ng-options="c.title group by c.subject for c in classes track by c.title" ng-model="selectedClasses" class="chosen-select">
-            <option value=""></option>
-          </select>
-
-        </div>
-        <div class="col-md-1">
-          <button class="btn btn-success" ng-click="make()">Make</button>
-        </div>
-
-      </div>
-      <div class="row">
-        <div class="col-md-12">
-
-
-          <div class="row">
-            <div class="col-md-2" ng-repeat="day in days">
-              <day-view day-view-events="events[day]" day-view-title="dayNames[day]" day-view-hour-begin="6" day-view-hour-end="23"></day-view>
-            </div>
-          </div>
-          
-        </div>
-      </div>
 
     </div>
 
@@ -72,6 +47,7 @@
     <script src="//cdnjs.cloudflare.com/ajax/libs/chosen/1.1.0/chosen.jquery.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
     <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular-resource.min.js"></script>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.11/angular-ui-router.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/moment.js/2.8.3/moment.min.js"></script>
     <script src="//cdnjs.cloudflare.com/ajax/libs/lodash.js/2.4.1/lodash.min.js"></script>
     <script src="app/vendor/angular-chosen/chosen.js"></script>

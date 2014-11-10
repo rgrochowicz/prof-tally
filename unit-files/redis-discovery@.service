@@ -1,0 +1,17 @@
+[Unit]
+Description=Redis Service Discovery
+
+Requires=etcd.service
+
+After=etcd.service
+After=redis@%i.service
+BindsTo=redis@%i.service
+
+[Service]
+EnvironmentFile=/etc/environment
+ExecStart=/bin/bash -c 'while true; do etcdctl set /services/redis/host ${COREOS_PRIVATE_IP} --ttl 45; etcdctl set /services/redis/port 6379 --ttl 45; sleep 30; done'
+ExecStop=/usr/bin/etcdctl rm /services/redis/host
+ExecStop=/usr/bin/etcdctl rm /services/redis/port
+
+[X-Fleet]
+X-ConditionMachineOf=redis@%i.service

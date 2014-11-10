@@ -1,0 +1,24 @@
+[Unit]
+Description=Populate Service
+
+Requires=etcd.service
+Requires=docker.service
+
+After=etcd.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+KillMode=none
+Environment="DOCKER_IMAGE=rgrochowicz/prof-tally:populate"
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill populate-%i
+ExecStartPre=-/usr/bin/docker rm populate-%i
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStartPre=/bin/sh -c '/usr/bin/etcdctl get /services/postgres/port || /usr/bin/etcdctl watch /services/postgres/port'
+ExecStartPre=/bin/sh -c '/usr/bin/etcdctl get /services/redis/port || /usr/bin/etcdctl watch /services/redis/port'
+ExecStart=/bin/sh -c '/usr/bin/docker run --rm --name populate-%i -p 8080:8080 -e POSTGRES_USER=tally -e POSTGRES_PASSWORD=tally -e POSTGRES_DATABASE=tally -e POSTGRES_HOST=$(etcdctl get /services/postgres/host) -e POSTGRES_PORT=$(etcdctl get /services/postgres/port) -e REDIS_HOST=$(etcdctl get /services/redis/host) -e REDIS_PORT $(etcdctl get /services/redis/port) ${DOCKER_IMAGE}'
+ExecStop=-/usr/bin/docker stop populate-%i
+
+[X-Fleet]
+X-Conflicts=populate@*.service

@@ -1,0 +1,21 @@
+<h1>Params?</h1>
+<form ng-submit="submit()">
+	<div class="row">
+		<div class="col-md-12">
+
+			<select chosen multiple ng-options="c.title group by c.subject for c in classes track by c.title" ng-model="selectedClasses" class="chosen-select">
+				<option value=""></option>
+			</select>
+
+		</div>
+		<div class="col-md-12">
+
+			<select chosen multiple ng-options="c.name for c in attrs track by c.short" ng-model="selectedAttrs" class="chosen-select">
+				<option value=""></option>
+			</select>
+
+		</div>
+
+	</div>
+	<button type="submit" class="btn btn-large btn-success">Make</button>
+</form>

@@ -4,7 +4,14 @@ The part that assembles the base requirements into all possible schedules.  Even
 
 ```
 api -----> queue -----> scheduler
- ^                          v
- |                          |
- ----------------------------
+ ^          | ^             v
+ |          v |             |
+ ------------ ---------------
 ```
+
+Required Environment Vars:
+-------------------------
+- BEANSTALKD_HOST
+- BEANSTALKD_PORT
+- REDIS_HOST
+- REDIS_PORT

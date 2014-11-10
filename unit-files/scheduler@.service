@@ -1,0 +1,24 @@
+[Unit]
+Description=Scheduler Service
+
+Requires=etcd.service
+Requires=docker.service
+
+After=etcd.service
+After=docker.service
+
+[Service]
+TimeoutStartSec=0
+KillMode=none
+Environment="DOCKER_IMAGE=rgrochowicz/prof-tally:scheduler"
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill scheduler-%i
+ExecStartPre=-/usr/bin/docker rm scheduler-%i
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStartPre=/bin/sh -c '/usr/bin/etcdctl get /services/redis/port || /usr/bin/etcdctl watch /services/redis/port'
+ExecStartPre=/bin/sh -c '/usr/bin/etcdctl get /services/beanstalkd/port || /usr/bin/etcdctl watch /services/beanstalkd/port'
+ExecStart=/bin/sh -c '/usr/bin/docker run --rm --name scheduler-%i -e REDIS_HOST=$(etcdctl get /services/redis/host) -e REDIS_PORT $(etcdctl get /services/redis/port) -e BEANSTALKD_HOST=$(etcdctl get /services/beanstalkd/host) -e BEANSTALKD_PORT $(etcdctl get /services/beanstalkd/port) ${DOCKER_IMAGE}'
+ExecStop=-/usr/bin/docker stop scheduler-%i
+
+[X-Fleet]
+X-Conflicts=scheduler@*.service

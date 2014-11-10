@@ -1,0 +1,24 @@
+[Unit]
+Description=Redis Service
+
+Requires=etcd.service
+Requires=docker.service
+Requires=redis-discovery@%i.service
+
+After=etcd.service
+After=docker.service
+Before=redis-discovery@%i.service
+
+[Service]
+TimeoutStartSec=0
+KillMode=none
+Environment="DOCKER_IMAGE=rgrochowicz/prof-tally:redis"
+EnvironmentFile=/etc/environment
+ExecStartPre=-/usr/bin/docker kill redis-%i
+ExecStartPre=-/usr/bin/docker rm redis-%i
+ExecStartPre=/usr/bin/docker pull ${DOCKER_IMAGE}
+ExecStart=/bin/sh -c '/usr/bin/docker run --rm --name redis-%i -p 6379:6379 ${DOCKER_IMAGE}'
+ExecStop=-/usr/bin/docker stop redis-%i
+
+[X-Fleet]
+X-Conflicts=redis@*.service
