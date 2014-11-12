@@ -14,6 +14,7 @@ type CrnSchedule []string
 
 type Scheduler struct {
 	Conn redis.Conn
+	ScheduleResult []CrnSchedule
 }
 
 func NewScheduler() (*Scheduler, error) {
@@ -30,20 +31,14 @@ func NewScheduler() (*Scheduler, error) {
 }
 
 func (s *Scheduler) Make(needles []string) []CrnSchedule {
-	return s.getNext([]string{}, needles)
+	
+	s.ScheduleResult = []CrnSchedule{}
+	s.getNext([]string{}, needles)
+
+	return s.ScheduleResult
 }
 
-func (s *Scheduler) getNext(crns, needles []string) []CrnSchedule {
-
-	//when there are no needles left, return the crns collected
-	if len(needles) == 0 {
-		crnsCopy := make(CrnSchedule, len(crns))
-		copy(crnsCopy, crns)
-
-		return []CrnSchedule{
-			crnsCopy,
-		}
-	}
+func (s *Scheduler) getNext(crns, needles []string) {
 
 	nextNeedle := needles[0]
 
@@ -52,23 +47,29 @@ func (s *Scheduler) getNext(crns, needles []string) []CrnSchedule {
 		crnArgs = append(crnArgs, fmt.Sprintf("crn:%s", crn))
 	}
 
-
 	//get all available courses based on set intersections
 	entries, err := redis.Strings(s.Conn.Do("SINTER", redis.Args{}.AddFlat(crnArgs).Add(nextNeedle)...))
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	finalResult := []CrnSchedule{}
-	for _, entry := range entries {
+	//when there are no needles left, append the crns collected
+	if len(needles) == 1 {
+		for _, entry := range entries {
 
-		results := s.getNext(append(crns, entry), needles[1:])
-		for _, result := range results {
-			finalResult = append(finalResult, result)
+			crnsCopy := make(CrnSchedule, len(crns))
+			copy(crnsCopy, crns)
+			crnsCopy = append(crnsCopy, entry)
+
+			s.ScheduleResult = append(s.ScheduleResult, crnsCopy)
 		}
+
+		return
 	}
 
-	return finalResult
+	for _, entry := range entries {
+		s.getNext(append(crns, entry), needles[1:])
+	}
 }
 
 func (s *Scheduler) Close() {
@@ -91,11 +92,13 @@ func MakeSchedules(needles []string) ([]byte, error) {
 
 	log.Printf("Schedules made: %d", len(crnSchedules))
 
+	jsonTime := time.Now()
 	jsonBytes, err := json.Marshal(crnSchedules)
 	if err != nil {
 		return nil, err
 	}
 
+	log.Println(time.Since(jsonTime))
 	log.Println(time.Since(startTime))
 
 	return jsonBytes, nil
