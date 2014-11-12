@@ -32,7 +32,9 @@ func NewScheduler() (*Scheduler, error) {
 
 func (s *Scheduler) Make(needles []string) []CrnSchedule {
 	
+	//clear out the previous results
 	s.ScheduleResult = []CrnSchedule{}
+
 	s.getNext([]string{}, needles)
 
 	return s.ScheduleResult
@@ -53,7 +55,7 @@ func (s *Scheduler) getNext(crns, needles []string) {
 		log.Fatalln(err)
 	}
 
-	//when there are no needles left, append the crns collected
+	//when we're on the last needle, append the crns collected
 	if len(needles) == 1 {
 		for _, entry := range entries {
 
@@ -98,8 +100,8 @@ func MakeSchedules(needles []string) ([]byte, error) {
 		return nil, err
 	}
 
-	log.Println(time.Since(jsonTime))
-	log.Println(time.Since(startTime))
+	log.Printf("JSON time: %s", time.Since(jsonTime))
+	log.Printf("Total time: %s", time.Since(startTime))
 
 	return jsonBytes, nil
 }
